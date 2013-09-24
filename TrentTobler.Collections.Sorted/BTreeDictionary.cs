@@ -435,6 +435,27 @@ namespace TrentTobler.Collections
                 array[arrayIndex++] = item;
         }
 
+		/// <summary>
+		/// Efficiently get a range of values starting with a specified lower bound, and continuing through to the specified upper bound.
+		/// </summary>
+		/// <param name="keyLowerBound">The lower bound value</param>
+		/// <param name="keyUpperBound">The upper bound value</param>
+		/// <returns></returns>
+		public IEnumerable<KeyValuePair<TKey, TValue>> WhereInRange( TKey keyLowerBound, TKey keyUpperBound )
+		{
+			Contract.Requires( this.keyComparer.Compare( keyUpperBound, keyLowerBound ) >= 0, String.Format( "Lower Bound ({0}) must be greater or equal to Upper Bound ({1})", keyLowerBound, keyUpperBound ) );
+			Contract.Ensures( Contract.Result<IEnumerable<KeyValuePair<TKey, TValue>>>() != null );
+
+			Node leafStart, leafEnd;
+			int leafStartPos, leafEndPos;
+
+			Node.Find( root, keyLowerBound, KeyComparer, AllowDuplicates ? -1 : 0, out leafStart, out leafStartPos );
+			if( !Node.Find( root, keyUpperBound, KeyComparer, AllowDuplicates ? 1 : 0, out leafEnd, out leafEndPos ) )
+				--leafEndPos;
+
+			return Node.Range( leafStart, leafStartPos, leafEnd, leafEndPos );
+		}
+
         #endregion
 
         #region Implementation - Nested Types
@@ -787,6 +808,58 @@ namespace TrentTobler.Collections
                 }
                 return rootIndex;
             }
+
+			public static IEnumerable<KeyValuePair<TKey, TValue>> Range( Node leafStart, int startPos, Node leafEnd, int endPos )
+			{
+				Contract.Requires( leafStart != null );
+				Contract.Requires( leafStart.IsLeaf );
+				Contract.Requires( 0 <= startPos && startPos <= leafStart.NodeCount );
+
+				Contract.Requires( leafEnd != null );
+				Contract.Requires( leafEnd.IsLeaf );
+				Contract.Requires( -1 <= endPos && endPos <= leafEnd.NodeCount );
+
+
+				if( endPos == -1 )
+				{
+					// Handle special case to start moving in the previous node.
+					leafEnd = leafEnd.prev;
+
+					if( leafEnd != null )
+						endPos = leafEnd.nodeCount - 1;
+
+				}
+				else if( endPos == leafEnd.NodeCount )
+				{
+					// Handle special case to start moving in the next node.
+					if( leafEnd.next == null )
+						--endPos;
+					else
+					{
+						leafEnd = leafEnd.next;
+						endPos = 0;
+					}
+				}
+
+
+				if( leafEnd == null )
+					yield break;
+
+				Node leaf = leafStart;
+				int pos = startPos;
+
+				while( leaf != leafEnd )
+				{
+					for( ; pos < leaf.nodeCount; ++pos )
+						yield return new KeyValuePair<TKey, TValue>( leaf.GetKey( pos ), leaf.GetValue( pos ) );
+
+					pos = 0;
+					leaf = leaf.next;
+				}
+
+				for( ; pos <= endPos; ++pos )
+					yield return new KeyValuePair<TKey, TValue>( leafEnd.GetKey( pos ), leafEnd.GetValue( pos ) );
+			}
 
             #endregion
 

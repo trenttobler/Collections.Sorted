@@ -316,6 +316,23 @@ namespace TrentTobler.Collections.Sorted.Tests
             sortedList.Select( i => i.Value ).AssertEqual( b.Values );
         }
 
+		[Test]
+		public void Range()
+		{
+			var b = CreateSampleTree();
+			var samples = new[]
+			{
+				new { start = 10, count = 10 },
+				new { start = 100, count = 800 }
+			};
+			foreach( var sample in samples )
+			{
+				var expected = sortedList.Skip( sample.start ).Take( sample.count ).ToArray();
+				Assert.IsTrue( expected.SequenceEqual( b.WhereInRange( expected.First().Key, expected.Last().Key ) ), "first/last" );
+				Assert.IsTrue( expected.SequenceEqual( b.WhereInRange( expected.First().Key, expected.Last().Key ) ), "first-1/last+1" );
+			}
+		}
+
         #endregion
     }
 }
