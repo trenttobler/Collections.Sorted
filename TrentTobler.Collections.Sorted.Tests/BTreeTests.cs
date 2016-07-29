@@ -67,6 +67,27 @@ namespace TrentTobler.Collections.Sorted.Tests
         #region Tests
 
         [Test]
+        public void AddRemoveFirstKeyBugTest()
+        {
+            // CodeProject.com comment / comment with bug sequence (Thanks, Member 11028508!)
+            var btree = new BTree<int>( 3 );
+            btree.Add( 1 );
+            btree.Add( 2 );
+            btree.Add( 3 );
+            btree.Add( 4 );
+            btree.Add( 5 );
+            btree.Add( 6 );
+            btree.Add( 7 );
+            btree.Add( 8 );
+            btree.Add( 9 );
+
+            btree.Remove( 3 );
+            btree.RemoveAt( 0 );
+
+            Assert.AreEqual( "2,4,5,6,7,8,9", string.Join( ",", btree ) );
+        }
+
+        [Test]
         public void AllowDuplicates()
         {
             var duplicates = new List<int>();
