@@ -59,7 +59,27 @@ namespace TrentTobler.Collections.Sorted.Tests
             return b;
         }
 
-        #region Tests
+		#region Tests
+
+		[Test]
+		public void TestRemoveFirst()
+		{
+			var instance = new BTreeDictionary<int, int>( 3 );
+			instance.Add( 1, 1 );
+			instance.Add( 2, 2 );
+			instance.Add( 3, 3 );
+			instance.Add( 4, 4 );
+			instance.Add( 5, 5 );
+			instance.Add( 6, 6 );
+			instance.Add( 7, 7 );
+			instance.Add( 8, 8 );
+			instance.Add( 9, 9 );
+
+			instance.Remove( 3 );
+			instance.RemoveAt( 0 );
+
+			Assert.AreEqual( "2,4,5,6,7,8,9", string.Join( ",", instance.Keys ) );
+		}
 
         [Test]
         public void AllowDuplicates()

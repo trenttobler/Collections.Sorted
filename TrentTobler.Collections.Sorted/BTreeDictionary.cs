@@ -1060,7 +1060,8 @@ namespace TrentTobler.Collections
                         EnsureParentKey( node.parent, pos );
 
                     // Delete the node from the next/prev linked list.
-                    node.prev.next = node.next;
+					if( node.prev != null )
+	                    node.prev.next = node.next;
                     if( node.next != null )
                         node.next.prev = node.prev;
 
