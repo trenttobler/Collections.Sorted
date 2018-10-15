@@ -37,21 +37,21 @@ namespace TrentTobler.Collections
     {
         #region Fields
 
-        Node root;
-        readonly Node first;
-        readonly KeyCollection keys;
-        readonly ValueCollection values;
-        readonly IComparer<TKey> keyComparer;
-        bool allowDuplicates = false;
+        Node _root;
+        readonly Node _first;
+        readonly KeyCollection _keys;
+        readonly ValueCollection _values;
+        readonly IComparer<TKey> _keyComparer;
+        bool _allowDuplicates = false;
 
         [ContractInvariantMethod]
         private void ObjectInvariant()
         {
-            Contract.Invariant( root != null );
-            Contract.Invariant( first != null );
-            Contract.Invariant( keyComparer != null );
-            Contract.Invariant( keys != null );
-            Contract.Invariant( values != null );
+            Contract.Invariant( _root != null );
+            Contract.Invariant( _first != null );
+            Contract.Invariant( _keyComparer != null );
+            Contract.Invariant( _keys != null );
+            Contract.Invariant( _values != null );
         }
 
         #endregion
@@ -78,12 +78,12 @@ namespace TrentTobler.Collections
             Contract.Requires( keyComparer != null, SR.nullArgumentError );
             Contract.Requires( nodeCapacity > 2, SR.btreeCapacityError );
 
-            this.keyComparer = keyComparer;
-            this.first = new Node( nodeCapacity );
-            this.root = this.first;
+            this._keyComparer = keyComparer;
+            this._first = new Node( nodeCapacity );
+            this._root = this._first;
 
-            this.keys = new KeyCollection( this );
-            this.values = new ValueCollection( this );
+            this._keys = new KeyCollection( this );
+            this._values = new ValueCollection( this );
         }
 
         #endregion
@@ -110,11 +110,11 @@ namespace TrentTobler.Collections
 
                 Node leaf;
                 int pos;
-                if( Node.Find( root, key, KeyComparer, 0, out leaf, out pos ) )
+                if( Node.Find( _root, key, KeyComparer, 0, out leaf, out pos ) )
                     leaf.SetValue( pos, value );
                 else
                 {
-                    Node.Insert( key, ref leaf, ref pos, ref root );
+                    Node.Insert( key, ref leaf, ref pos, ref _root );
                     leaf.SetValue( pos, value );
                 }
             }
@@ -129,7 +129,7 @@ namespace TrentTobler.Collections
             {
                 Contract.Ensures( Contract.Result<int>() >= 0 );
 
-                return this.root.TotalCount;
+                return this._root.TotalCount;
             }
         }
 
@@ -142,7 +142,7 @@ namespace TrentTobler.Collections
             {
                 Contract.Ensures( Contract.Result<IComparer<TKey>>() != null );
 
-                return this.keyComparer;
+                return this._keyComparer;
             }
         }
 
@@ -155,7 +155,7 @@ namespace TrentTobler.Collections
             {
                 Contract.Ensures( Contract.Result<ISortedCollection<TKey>>() != null );
 
-                return this.keys;
+                return this._keys;
             }
         }
 
@@ -168,7 +168,7 @@ namespace TrentTobler.Collections
             {
                 Contract.Ensures( Contract.Result<ICollection<TValue>>() != null );
 
-                return this.values;
+                return this._values;
             }
         }
 
@@ -188,14 +188,14 @@ namespace TrentTobler.Collections
         {
             get
             {
-                return this.allowDuplicates;
+                return this._allowDuplicates;
             }
             set
             {
                 Contract.Requires( !IsReadOnly, SR.immutableError );
                 Contract.Requires( value == true || AllowDuplicates == false || Count == 0, SR.collectionMustBeEmptyToClearAllowDuplicates );
 
-                this.allowDuplicates = value;
+                this._allowDuplicates = value;
             }
         }
 
@@ -242,7 +242,7 @@ namespace TrentTobler.Collections
         {
             Node leaf;
             int pos;
-            var found = Node.Find( root, key, KeyComparer, 0, out leaf, out pos );
+            var found = Node.Find( _root, key, KeyComparer, 0, out leaf, out pos );
             return found;
         }
 
@@ -256,7 +256,7 @@ namespace TrentTobler.Collections
         {
             Node leaf;
             int pos;
-            var found = Node.Find( root, key, KeyComparer, AllowDuplicates ? LookupBias : 0, out leaf, out pos );
+            var found = Node.Find( _root, key, KeyComparer, AllowDuplicates ? LookupBias : 0, out leaf, out pos );
             value = found ? leaf.GetValue( pos ) : default(TValue);
             return found;
         }
@@ -272,7 +272,7 @@ namespace TrentTobler.Collections
 
             Node leaf;
             int pos;
-            var found = Node.Find( root, key, KeyComparer, AllowDuplicates ? InsertBias : 0, out leaf, out pos );
+            var found = Node.Find( _root, key, KeyComparer, AllowDuplicates ? InsertBias : 0, out leaf, out pos );
             if( found )
             {
                 if( !AllowDuplicates )
@@ -281,7 +281,7 @@ namespace TrentTobler.Collections
                     ++pos;
             }
 
-            Node.Insert( key, ref leaf, ref pos, ref root );
+            Node.Insert( key, ref leaf, ref pos, ref _root );
             leaf.SetValue( pos, value );
         }
 
@@ -294,7 +294,7 @@ namespace TrentTobler.Collections
         {
             Contract.Requires( index >= 0 && index < this.Count, SR.indexOutOfRangeError );
 
-            var leaf = Node.LeafAt( root, ref index );
+            var leaf = Node.LeafAt( _root, ref index );
             return new KeyValuePair<TKey, TValue>( leaf.GetKey( index ), leaf.GetValue( index ) );
         }
 
@@ -305,8 +305,8 @@ namespace TrentTobler.Collections
         {
             Contract.Requires( !IsReadOnly, SR.immutableError );
 
-            Node.Clear( first );
-            root = first;
+            Node.Clear( _first );
+            _root = _first;
         }
 
         /// <summary>
@@ -320,10 +320,10 @@ namespace TrentTobler.Collections
 
             Node leaf;
             int pos;
-            if( !Node.Find( root, key, KeyComparer, AllowDuplicates ? RemoveBias : 0, out leaf, out pos ) )
+            if( !Node.Find( _root, key, KeyComparer, AllowDuplicates ? RemoveBias : 0, out leaf, out pos ) )
                 return false;
 
-            Node.Remove( leaf, pos, ref root );
+            Node.Remove( leaf, pos, ref _root );
             return true;
         }
 
@@ -336,8 +336,8 @@ namespace TrentTobler.Collections
             Contract.Requires( !IsReadOnly, SR.immutableError );
             Contract.Requires( index >= 0 && index < this.Count );
 
-            var leaf = Node.LeafAt( root, ref index );
-            Node.Remove( leaf, index, ref root );
+            var leaf = Node.LeafAt( _root, ref index );
+            Node.Remove( leaf, index, ref _root );
         }
 
 
@@ -349,7 +349,7 @@ namespace TrentTobler.Collections
             Contract.Requires( index >= 0 && index <= this.Count, SR.indexOutOfRangeError );
             Contract.Ensures( Contract.Result<IEnumerable<KeyValuePair<TKey, TValue>>>() != null );
 
-            var node = Node.LeafAt( root, ref index );
+            var node = Node.LeafAt( _root, ref index );
             return Node.ForwardFromIndex( node, index );
         }
 
@@ -361,7 +361,7 @@ namespace TrentTobler.Collections
             Contract.Requires( index >= 0 && index <= this.Count, SR.indexOutOfRangeError );
             Contract.Ensures( Contract.Result<IEnumerable<KeyValuePair<TKey, TValue>>>() != null );
 
-            var node = Node.LeafAt( root, ref index );
+            var node = Node.LeafAt( _root, ref index );
             return Node.BackwardFromIndex( node, index );
         }
 
@@ -375,7 +375,7 @@ namespace TrentTobler.Collections
             Contract.Requires( !IsReadOnly, SR.immutableError );
             Contract.Requires( index >= 0 && index < this.Count );
 
-            var leaf = Node.LeafAt( root, ref index );
+            var leaf = Node.LeafAt( _root, ref index );
             leaf.SetValue( index, value );
         }
 
@@ -387,7 +387,7 @@ namespace TrentTobler.Collections
         {
             Contract.Ensures( Contract.Result<IEnumerator<KeyValuePair<TKey, TValue>>>() != null );
 
-            return Node.ForwardFromIndex( first, 0 ).GetEnumerator();
+            return Node.ForwardFromIndex( _first, 0 ).GetEnumerator();
         }
 
         /// <summary>
@@ -402,7 +402,7 @@ namespace TrentTobler.Collections
 
             Node leaf;
             int leafPos;
-            Node.Find( root, keyLowerBound, KeyComparer, AllowDuplicates ? -1 : 0, out leaf, out leafPos );
+            Node.Find( _root, keyLowerBound, KeyComparer, AllowDuplicates ? -1 : 0, out leaf, out leafPos );
             return Node.ForwardFromIndex( leaf, leafPos );
         }
 
@@ -418,7 +418,7 @@ namespace TrentTobler.Collections
 
             Node leaf;
             int leafPos;
-            var found = Node.Find( root, keyUpperBound, KeyComparer, AllowDuplicates ? 1 : 0, out leaf, out leafPos );
+            var found = Node.Find( _root, keyUpperBound, KeyComparer, AllowDuplicates ? 1 : 0, out leaf, out leafPos );
             if( !found )
                 --leafPos;
             return Node.BackwardFromIndex( leaf, leafPos );
@@ -443,14 +443,14 @@ namespace TrentTobler.Collections
 		/// <returns></returns>
 		public IEnumerable<KeyValuePair<TKey, TValue>> WhereInRange( TKey keyLowerBound, TKey keyUpperBound )
 		{
-			Contract.Requires( this.keyComparer.Compare( keyUpperBound, keyLowerBound ) >= 0, String.Format( "Lower Bound ({0}) must be greater or equal to Upper Bound ({1})", keyLowerBound, keyUpperBound ) );
+			Contract.Requires( this._keyComparer.Compare( keyUpperBound, keyLowerBound ) >= 0, String.Format( "Lower Bound ({0}) must be greater or equal to Upper Bound ({1})", keyLowerBound, keyUpperBound ) );
 			Contract.Ensures( Contract.Result<IEnumerable<KeyValuePair<TKey, TValue>>>() != null );
 
 			Node leafStart, leafEnd;
 			int leafStartPos, leafEndPos;
 
-			Node.Find( root, keyLowerBound, KeyComparer, AllowDuplicates ? -1 : 0, out leafStart, out leafStartPos );
-			if( !Node.Find( root, keyUpperBound, KeyComparer, AllowDuplicates ? 1 : 0, out leafEnd, out leafEndPos ) )
+			Node.Find( _root, keyLowerBound, KeyComparer, AllowDuplicates ? -1 : 0, out leafStart, out leafStartPos );
+			if( !Node.Find( _root, keyUpperBound, KeyComparer, AllowDuplicates ? 1 : 0, out leafEnd, out leafEndPos ) )
 				--leafEndPos;
 
 			return Node.Range( leafStart, leafStartPos, leafEnd, leafEndPos );
@@ -460,37 +460,37 @@ namespace TrentTobler.Collections
 
         #region Implementation - Nested Types
 
-        [DebuggerDisplay( "Count={nodeCount}/{totalCount}, First={keys[0]}" )]
+        [DebuggerDisplay( "Count={_nodeCount}/{_totalCount}, First={keys[0]}" )]
         sealed class Node
         {
             #region Fields
 
-            readonly TKey[] keys;
-            readonly TValue[] values;
-            readonly Node[] nodes;
+            readonly TKey[] _keys;
+            readonly TValue[] _values;
+            readonly Node[] _nodes;
 
-            int nodeCount;
-            int totalCount;
+            int _nodeCount;
+            int _totalCount;
 
-            Node parent;
-            Node next;
-            Node prev;
+            Node _parent;
+            Node _next;
+            Node _prev;
 
             [ContractInvariantMethod]
             private void ObjectInvariant()
             {
                 // Simple BTree invariants
-                Contract.Invariant( keys != null );
-                Contract.Invariant( nodeCount >= 0 && nodeCount <= keys.Length );
-                Contract.Invariant( nodes == null || keys.Length == nodes.Length );
+                Contract.Invariant( _keys != null );
+                Contract.Invariant( _nodeCount >= 0 && _nodeCount <= _keys.Length );
+                Contract.Invariant( _nodes == null || _keys.Length == _nodes.Length );
 
                 // Key/Value BTree invariants
-                Contract.Invariant( values == null || keys.Length == values.Length );
-                Contract.Invariant( values == null || nodes == null );
-                Contract.Invariant( values != null || nodes != null );
+                Contract.Invariant( _values == null || _keys.Length == _values.Length );
+                Contract.Invariant( _values == null || _nodes == null );
+                Contract.Invariant( _values != null || _nodes != null );
                 
                 // Indexable BTree invariants
-                Contract.Invariant( totalCount >= 0 );
+                Contract.Invariant( _totalCount >= 0 );
             }
 
             #endregion
@@ -513,7 +513,7 @@ namespace TrentTobler.Collections
             {
                 get
                 {
-                    return this.totalCount;
+                    return this._totalCount;
                 }
             }
 
@@ -521,7 +521,7 @@ namespace TrentTobler.Collections
             {
                 get
                 {
-                    return this.parent == null;
+                    return this._parent == null;
                 }
             }
 
@@ -529,7 +529,7 @@ namespace TrentTobler.Collections
             {
                 get
                 {
-                    return nodes == null;
+                    return _nodes == null;
                 }
             }
 
@@ -537,7 +537,7 @@ namespace TrentTobler.Collections
             {
                 get
                 {
-                    return this.nodeCount;
+                    return this._nodeCount;
                 }
             }
 
@@ -550,8 +550,8 @@ namespace TrentTobler.Collections
             /// </summary>
             public TKey GetKey( int pos )
             {
-                Contract.Requires( pos >= 0 && pos < this.nodeCount );
-                return this.keys[pos];
+                Contract.Requires( pos >= 0 && pos < this._nodeCount );
+                return this._keys[pos];
             }
 
             /// <summary>
@@ -560,7 +560,7 @@ namespace TrentTobler.Collections
             public TValue GetValue( int pos )
             {
                 Contract.Requires( pos >= 0 && pos < this.NodeCount );
-                return this.values[pos];
+                return this._values[pos];
             }
 
             /// <summary>
@@ -569,7 +569,7 @@ namespace TrentTobler.Collections
             public void SetValue( int pos, TValue value )
             {
                 Contract.Requires( pos >= 0 && pos < this.NodeCount );
-                this.values[pos] = value;
+                this._values[pos] = value;
             }
 
             /// <summary>
@@ -587,21 +587,21 @@ namespace TrentTobler.Collections
                 int nodeIndex = 0;
                 while( true )
                 {
-                    if( root.nodes == null )
+                    if( root._nodes == null )
                     {
-                        Contract.Assume( pos < root.nodeCount );
+                        Contract.Assume( pos < root._nodeCount );
                         return root;
                     }
 
-                    var node = root.nodes[nodeIndex];
-                    if( pos < node.totalCount )
+                    var node = root._nodes[nodeIndex];
+                    if( pos < node._totalCount )
                     {
                         root = node;
                         nodeIndex = 0;
                     }
                     else
                     {
-                        pos -= node.totalCount;
+                        pos -= node._totalCount;
                         ++nodeIndex;
                     }
                 }
@@ -617,8 +617,8 @@ namespace TrentTobler.Collections
                 Contract.Ensures( Contract.ValueAtReturn<Node>( out leaf ) != null );
                 Contract.Ensures( 0 <= Contract.ValueAtReturn<int>( out pos ) && Contract.ValueAtReturn<int>( out pos ) <= leaf.NodeCount );
 
-                pos = Array.BinarySearch( root.keys, 0, root.nodeCount, key, keyComparer );
-                while( root.nodes != null )
+                pos = Array.BinarySearch( root._keys, 0, root._nodeCount, key, keyComparer );
+                while( root._nodes != null )
                 {
                     if( pos >= 0 )
                     {
@@ -626,7 +626,7 @@ namespace TrentTobler.Collections
                             MoveToDuplicatesBoundary( key, keyComparer, duplicatesBias, ref root, ref pos );
 
                         // Found an exact match.  Move down one level.
-                        root = root.nodes[pos];
+                        root = root._nodes[pos];
                     }
                     else
                     {
@@ -634,10 +634,10 @@ namespace TrentTobler.Collections
                         pos = ~pos;
                         if( pos > 0 )
                             --pos;
-                        root = root.nodes[pos];
+                        root = root._nodes[pos];
                     }
                     Contract.Assume( root != null );
-                    pos = Array.BinarySearch( root.keys, 0, root.nodeCount, key, keyComparer );
+                    pos = Array.BinarySearch( root._keys, 0, root._nodeCount, key, keyComparer );
                 }
 
                 leaf = root;
@@ -659,25 +659,25 @@ namespace TrentTobler.Collections
             public static void Insert( TKey key, ref Node leaf, ref int pos, ref Node root )
             {
                 // Make sure there is space for the new key.
-                if( EnsureSpace( leaf, ref root ) && pos > leaf.nodeCount )
+                if( EnsureSpace( leaf, ref root ) && pos > leaf._nodeCount )
                 {
-                    pos -= leaf.nodeCount;
-                    leaf = leaf.next;
+                    pos -= leaf._nodeCount;
+                    leaf = leaf._next;
                 }
 
                 // Insert the key.
-                int moveCount = leaf.nodeCount - pos;
-                Array.Copy( leaf.keys, pos, leaf.keys, pos + 1, moveCount );
-                leaf.keys[pos] = key;
-                ++leaf.nodeCount;
+                int moveCount = leaf._nodeCount - pos;
+                Array.Copy( leaf._keys, pos, leaf._keys, pos + 1, moveCount );
+                leaf._keys[pos] = key;
+                ++leaf._nodeCount;
                 EnsureParentKey( leaf, pos );
 
                 // Insert space for the value.  Caller is responsible for filling in value.
-                Array.Copy( leaf.values, pos, leaf.values, pos + 1, moveCount );
+                Array.Copy( leaf._values, pos, leaf._values, pos + 1, moveCount );
 
                 // Update total counts.
-                for( var node = leaf; node != null; node = node.parent )
-                    ++node.totalCount;
+                for( var node = leaf; node != null; node = node._parent )
+                    ++node._totalCount;
             }
 
             /// <summary>
@@ -690,18 +690,18 @@ namespace TrentTobler.Collections
                 Contract.Requires( leaf.IsLeaf );
 
                 // Update total counts.
-                for( var node = leaf; node != null; node = node.parent )
-                    --node.totalCount;
+                for( var node = leaf; node != null; node = node._parent )
+                    --node._totalCount;
 
                 // Remove the key and value from the node.
-                --leaf.nodeCount;
-                Array.Copy( leaf.keys, pos + 1, leaf.keys, pos, leaf.nodeCount - pos );
-                Array.Copy( leaf.values, pos + 1, leaf.values, pos, leaf.nodeCount - pos );
-                leaf.keys[leaf.nodeCount] = default( TKey );
-                leaf.values[leaf.nodeCount] = default( TValue );
+                --leaf._nodeCount;
+                Array.Copy( leaf._keys, pos + 1, leaf._keys, pos, leaf._nodeCount - pos );
+                Array.Copy( leaf._values, pos + 1, leaf._values, pos, leaf._nodeCount - pos );
+                leaf._keys[leaf._nodeCount] = default( TKey );
+                leaf._values[leaf._nodeCount] = default( TValue );
 
                 // Make sure parent keys index correctly into this node.
-                if( leaf.nodeCount > 0 )
+                if( leaf._nodeCount > 0 )
                     EnsureParentKey( leaf, pos );
 
                 // Merge this node with others if it is below the node capacity threshold.
@@ -720,13 +720,13 @@ namespace TrentTobler.Collections
 
                 while( leaf != null )
                 {
-                    while( pos < leaf.nodeCount )
+                    while( pos < leaf._nodeCount )
                     {
                         yield return new KeyValuePair<TKey,TValue>( leaf.GetKey(pos), leaf.GetValue( pos ) );
                         ++pos;
                     }
-                    pos -= leaf.nodeCount;
-                    leaf = leaf.next;
+                    pos -= leaf._nodeCount;
+                    leaf = leaf._next;
                 }
             }
 
@@ -742,20 +742,20 @@ namespace TrentTobler.Collections
                 if( pos == -1 )
                 {
                     // Handle special case to start moving in the previous node.
-                    leaf = leaf.prev;
+                    leaf = leaf._prev;
                     if( leaf != null )
-                        pos = leaf.nodeCount - 1;
+                        pos = leaf._nodeCount - 1;
                     else
                         pos = 0;
                 }
                 else if( pos == leaf.NodeCount )
                 {
                     // Handle special case to start moving in the next node.
-                    if( leaf.next == null )
+                    if( leaf._next == null )
                         --pos;
                     else
                     {
-                        leaf = leaf.next;
+                        leaf = leaf._next;
                         pos = 0;
                     }
                 }
@@ -768,9 +768,9 @@ namespace TrentTobler.Collections
                         yield return new KeyValuePair<TKey, TValue>( leaf.GetKey( pos ), leaf.GetValue( pos ) );
                         --pos;
                     }
-                    leaf = leaf.prev;
+                    leaf = leaf._prev;
                     if( leaf != null )
-                        pos += leaf.nodeCount;
+                        pos += leaf._nodeCount;
                 }
             }
 
@@ -781,15 +781,15 @@ namespace TrentTobler.Collections
             {
                 Contract.Requires( firstNode != null );
 
-                int clearCount = firstNode.nodeCount;
+                int clearCount = firstNode._nodeCount;
 
-                Array.Clear( firstNode.keys, 0, clearCount );
-                Array.Clear( firstNode.values, 0, clearCount );
-                firstNode.nodeCount = 0;
-                firstNode.totalCount = 0;
+                Array.Clear( firstNode._keys, 0, clearCount );
+                Array.Clear( firstNode._values, 0, clearCount );
+                firstNode._nodeCount = 0;
+                firstNode._totalCount = 0;
 
-                firstNode.parent = null;
-                firstNode.next = null;
+                firstNode._parent = null;
+                firstNode._next = null;
             }
 
             /// <summary>
@@ -799,12 +799,12 @@ namespace TrentTobler.Collections
             {
                 var node = leaf;
                 var rootIndex = pos;
-                while( node.parent != null )
+                while( node._parent != null )
                 {
-                    int nodePos = Array.IndexOf( node.parent.nodes, node, 0, node.parent.nodeCount );
+                    int nodePos = Array.IndexOf( node._parent._nodes, node, 0, node._parent._nodeCount );
                     for( int i = 0; i < nodePos; ++i )
-                        rootIndex += node.parent.nodes[i].totalCount;
-                    node = node.parent;
+                        rootIndex += node._parent._nodes[i]._totalCount;
+                    node = node._parent;
                 }
                 return rootIndex;
             }
@@ -823,20 +823,20 @@ namespace TrentTobler.Collections
 				if( endPos == -1 )
 				{
 					// Handle special case to start moving in the previous node.
-					leafEnd = leafEnd.prev;
+					leafEnd = leafEnd._prev;
 
 					if( leafEnd != null )
-						endPos = leafEnd.nodeCount - 1;
+						endPos = leafEnd._nodeCount - 1;
 
 				}
 				else if( endPos == leafEnd.NodeCount )
 				{
 					// Handle special case to start moving in the next node.
-					if( leafEnd.next == null )
+					if( leafEnd._next == null )
 						--endPos;
 					else
 					{
-						leafEnd = leafEnd.next;
+						leafEnd = leafEnd._next;
 						endPos = 0;
 					}
 				}
@@ -850,11 +850,11 @@ namespace TrentTobler.Collections
 
 				while( leaf != leafEnd )
 				{
-					for( ; pos < leaf.nodeCount; ++pos )
+					for( ; pos < leaf._nodeCount; ++pos )
 						yield return new KeyValuePair<TKey, TValue>( leaf.GetKey( pos ), leaf.GetValue( pos ) );
 
 					pos = 0;
-					leaf = leaf.next;
+					leaf = leaf._next;
 				}
 
 				for( ; pos <= endPos; ++pos )
@@ -867,24 +867,24 @@ namespace TrentTobler.Collections
 
             Node( int nodeCapacity, bool leaf )
             {
-                this.keys = new TKey[nodeCapacity];
+                this._keys = new TKey[nodeCapacity];
 
                 if( leaf )
                 {
-                    this.values = new TValue[nodeCapacity];
-                    this.nodes = null;
+                    this._values = new TValue[nodeCapacity];
+                    this._nodes = null;
                 }
                 else
                 {
-                    this.values = null;
-                    this.nodes = new Node[nodeCapacity];
+                    this._values = null;
+                    this._nodes = new Node[nodeCapacity];
                 }
 
-                this.nodeCount = 0;
-                this.totalCount = 0;
-                this.parent = null;
-                this.next = null;
-                this.prev = null;
+                this._nodeCount = 0;
+                this._totalCount = 0;
+                this._parent = null;
+                this._next = null;
+                this._prev = null;
             }
 
             /// <summary>
@@ -907,16 +907,16 @@ namespace TrentTobler.Collections
                 if( duplicatesBias < 0 )
                 {
                     // Move backward over duplicates.
-                    while( pos > 0 && 0 == keyComparer.Compare( node.keys[pos - 1], key ) )
+                    while( pos > 0 && 0 == keyComparer.Compare( node._keys[pos - 1], key ) )
                         --pos;
 
                     // Special case: duplicates can span backwards into the previous node because the parent
                     // key pivot might be in the center for the duplicates.
-                    if( pos == 0 && node.prev != null )
+                    if( pos == 0 && node._prev != null )
                     {
-                        var prev = node.prev;
+                        var prev = node._prev;
                         var prevPos = prev.NodeCount;
-                        while( prevPos > 0 && 0 == keyComparer.Compare( prev.keys[prevPos - 1], key ) )
+                        while( prevPos > 0 && 0 == keyComparer.Compare( prev._keys[prevPos - 1], key ) )
                         {
                             --prevPos;
                         }
@@ -930,76 +930,76 @@ namespace TrentTobler.Collections
                 else
                 {
                     // Move forward over duplicates.
-                    while( pos < node.NodeCount - 1 && 0 == keyComparer.Compare( node.keys[pos + 1], key ) )
+                    while( pos < node.NodeCount - 1 && 0 == keyComparer.Compare( node._keys[pos + 1], key ) )
                         ++pos;
                 }
             }
 
             static bool EnsureSpace( Node node, ref Node root )
             {
-                if( node.nodeCount < node.keys.Length )
+                if( node._nodeCount < node._keys.Length )
                     return false;
 
                 EnsureParent( node, ref root );
-                EnsureSpace( node.parent, ref root );
+                EnsureSpace( node._parent, ref root );
 
-                var sibling = new Node( node.keys.Length, node.nodes == null );
-                sibling.next = node.next;
-                sibling.prev = node;
-                sibling.parent = node.parent;
+                var sibling = new Node( node._keys.Length, node._nodes == null );
+                sibling._next = node._next;
+                sibling._prev = node;
+                sibling._parent = node._parent;
 
-                if( node.next != null )
-                    node.next.prev = sibling;
-                node.next = sibling;
+                if( node._next != null )
+                    node._next._prev = sibling;
+                node._next = sibling;
 
-                int pos = Array.IndexOf( node.parent.nodes, node, 0, node.parent.nodeCount );
+                int pos = Array.IndexOf( node._parent._nodes, node, 0, node._parent._nodeCount );
                 int siblingPos = pos + 1;
 
-                Array.Copy( node.parent.keys, siblingPos, node.parent.keys, siblingPos + 1, node.parent.nodeCount - siblingPos );
-                Array.Copy( node.parent.nodes, siblingPos, node.parent.nodes, siblingPos + 1, node.parent.nodeCount - siblingPos );
-                ++node.parent.nodeCount;
-                node.parent.nodes[siblingPos] = sibling;
+                Array.Copy( node._parent._keys, siblingPos, node._parent._keys, siblingPos + 1, node._parent._nodeCount - siblingPos );
+                Array.Copy( node._parent._nodes, siblingPos, node._parent._nodes, siblingPos + 1, node._parent._nodeCount - siblingPos );
+                ++node._parent._nodeCount;
+                node._parent._nodes[siblingPos] = sibling;
 
-                int half = node.nodeCount / 2;
-                int halfCount = node.nodeCount - half;
+                int half = node._nodeCount / 2;
+                int halfCount = node._nodeCount - half;
                 Move( node, half, sibling, 0, halfCount );
                 return true;
             }
 
             static void Move( Node source, int sourceIndex, Node target, int targetIndex, int moveCount )
             {
-                Move( source.keys, sourceIndex, source.nodeCount, target.keys, targetIndex, target.nodeCount, moveCount );
-                if( source.values != null )
-                    Move( source.values, sourceIndex, source.nodeCount, target.values, targetIndex, target.nodeCount, moveCount );
+                Move( source._keys, sourceIndex, source._nodeCount, target._keys, targetIndex, target._nodeCount, moveCount );
+                if( source._values != null )
+                    Move( source._values, sourceIndex, source._nodeCount, target._values, targetIndex, target._nodeCount, moveCount );
 
                 int totalMoveCount;
-                if( source.nodes == null )
+                if( source._nodes == null )
                 {
                     totalMoveCount = moveCount;
                 }
                 else
                 {
-                    Move( source.nodes, sourceIndex, source.nodeCount, target.nodes, targetIndex, target.nodeCount, moveCount );
+                    Move( source._nodes, sourceIndex, source._nodeCount, target._nodes, targetIndex, target._nodeCount, moveCount );
                     totalMoveCount = 0;
                     for( int i = 0; i < moveCount; ++i )
                     {
-                        var child = target.nodes[targetIndex + i];
-                        child.parent = target;
-                        totalMoveCount += child.totalCount;
+                        var child = target._nodes[targetIndex + i];
+                        child._parent = target;
+                        totalMoveCount += child._totalCount;
                     }
                 }
 
-                source.nodeCount -= moveCount;
-                target.nodeCount += moveCount;
+                source._nodeCount -= moveCount;
+                target._nodeCount += moveCount;
 
                 var sn = source;
                 var tn = target;
                 while( sn != null && sn != tn )
                 {
-                    sn.totalCount -= totalMoveCount;
-                    tn.totalCount += totalMoveCount;
-                    sn = sn.parent;
-                    tn = tn.parent;
+                    sn._totalCount -= totalMoveCount;
+                    tn._totalCount += totalMoveCount;
+                    sn = sn._parent;
+                    tn = tn._parent;
                 }
 
                 EnsureParentKey( source, sourceIndex );
@@ -1016,80 +1016,80 @@ namespace TrentTobler.Collections
 
             static void EnsureParent( Node node, ref Node root )
             {
-                if( node.parent != null )
+                if( node._parent != null )
                     return;
 
-                var parent = new Node( node.keys.Length, false );
-                parent.totalCount = node.totalCount;
-                parent.nodeCount = 1;
-                parent.keys[0] = node.keys[0];
-                parent.nodes[0] = node;
+                var parent = new Node( node._keys.Length, false );
+                parent._totalCount = node._totalCount;
+                parent._nodeCount = 1;
+                parent._keys[0] = node._keys[0];
+                parent._nodes[0] = node;
 
-                node.parent = parent;
+                node._parent = parent;
                 root = parent;
             }
 
             static void EnsureParentKey( Node node, int pos )
             {
-                while( pos == 0 && node.parent != null )
+                while( pos == 0 && node._parent != null )
                 {
-                    pos = Array.IndexOf( node.parent.nodes, node, 0, node.parent.nodeCount );
-                    node.parent.keys[pos] = node.keys[0];
-                    node = node.parent;
+                    pos = Array.IndexOf( node._parent._nodes, node, 0, node._parent._nodeCount );
+                    node._parent._keys[pos] = node._keys[0];
+                    node = node._parent;
                 }
             }
 
             static void Merge( Node node, ref Node root )
             {
-                if( node.nodeCount == 0 )
+                if( node._nodeCount == 0 )
                 {
                     // Handle special case: Empty node.
-                    if( node.parent == null )
+                    if( node._parent == null )
                         return;
 
                     // Remove the node from the parent nodes.
-                    int pos = Array.IndexOf( node.parent.nodes, node, 0, node.parent.nodeCount );
-                    --node.parent.nodeCount;
-                    Array.Copy( node.parent.keys, pos + 1, node.parent.keys, pos, node.parent.nodeCount - pos );
-                    Array.Copy( node.parent.nodes, pos + 1, node.parent.nodes, pos, node.parent.nodeCount - pos );
-                    node.parent.keys[node.parent.nodeCount] = default( TKey );
-                    node.parent.nodes[node.parent.nodeCount] = null;
+                    int pos = Array.IndexOf( node._parent._nodes, node, 0, node._parent._nodeCount );
+                    --node._parent._nodeCount;
+                    Array.Copy( node._parent._keys, pos + 1, node._parent._keys, pos, node._parent._nodeCount - pos );
+                    Array.Copy( node._parent._nodes, pos + 1, node._parent._nodes, pos, node._parent._nodeCount - pos );
+                    node._parent._keys[node._parent._nodeCount] = default( TKey );
+                    node._parent._nodes[node._parent._nodeCount] = null;
 
                     // Make sure parent (of the parent) keys link down correctly.
-                    if( node.parent.nodeCount > 0 )
-                        EnsureParentKey( node.parent, pos );
+                    if( node._parent._nodeCount > 0 )
+                        EnsureParentKey( node._parent, pos );
 
                     // Delete the node from the next/prev linked list.
-					if( node.prev != null )
-	                    node.prev.next = node.next;
-                    if( node.next != null )
-                        node.next.prev = node.prev;
+					if( node._prev != null )
+	                    node._prev._next = node._next;
+                    if( node._next != null )
+                        node._next._prev = node._prev;
 
                     // Merge the parent node.
-                    Merge( node.parent, ref root );
+                    Merge( node._parent, ref root );
                     return;
                 }
 
-                if( node.next == null )
+                if( node._next == null )
                 {
-                    if( node.parent == null && node.nodeCount == 1 && node.nodes != null )
+                    if( node._parent == null && node._nodeCount == 1 && node._nodes != null )
                     {
-                        root = node.nodes[0];
-                        root.parent = null;
+                        root = node._nodes[0];
+                        root._parent = null;
                     }
 
                     return;
                 }
 
-                if( node.nodeCount >= node.keys.Length / 2 )
+                if( node._nodeCount >= node._keys.Length / 2 )
                     return;
 
-                int count = node.next.nodeCount;
-                if( node.nodeCount + count > node.keys.Length )
-                    count -= ( node.nodeCount + count ) / 2;
+                int count = node._next._nodeCount;
+                if( node._nodeCount + count > node._keys.Length )
+                    count -= ( node._nodeCount + count ) / 2;
 
-                Move( node.next, 0, node, node.nodeCount, count );
-                Merge( node.next, ref root );
+                Move( node._next, 0, node, node._nodeCount, count );
+                Merge( node._next, ref root );
             }
 
             #endregion
@@ -1099,7 +1099,7 @@ namespace TrentTobler.Collections
         {
             #region Fields
 
-            protected readonly BTreeDictionary<TKey,TValue> tree;
+            protected readonly BTreeDictionary<TKey,TValue> Tree;
 
             #endregion
 
@@ -1107,7 +1107,7 @@ namespace TrentTobler.Collections
 
             public KeyValueCollectionBase( BTreeDictionary<TKey,TValue> tree )
             {
-                this.tree = tree;
+                this.Tree = tree;
             }
 
             #endregion
@@ -1118,7 +1118,7 @@ namespace TrentTobler.Collections
             {
                 get
                 {
-                    return tree.Count;
+                    return Tree.Count;
                 }
             }
 
@@ -1185,12 +1185,12 @@ namespace TrentTobler.Collections
             
             public override bool Contains( TValue item )
             {
-                return this.tree.Any( keyValue => object.Equals( item, keyValue.Value ) );
+                return this.Tree.Any( keyValue => object.Equals( item, keyValue.Value ) );
             }
 
             public override IEnumerator<TValue> GetEnumerator()
             {
-                return this.tree.Select( keyValue => keyValue.Value ).GetEnumerator();
+                return this.Tree.Select( keyValue => keyValue.Value ).GetEnumerator();
             }
 
             #endregion
@@ -1213,7 +1213,7 @@ namespace TrentTobler.Collections
             {
                 get
                 {
-                    return tree.AllowDuplicates;
+                    return Tree.AllowDuplicates;
                 }
             }
 
@@ -1221,7 +1221,7 @@ namespace TrentTobler.Collections
             {
                 get
                 {
-                    return tree.KeyComparer;
+                    return Tree.KeyComparer;
                 }
             }
 
@@ -1233,7 +1233,7 @@ namespace TrentTobler.Collections
             {
                 Node leaf;
                 int pos;
-                var found = Node.Find( tree.root, value, tree.KeyComparer, AllowDuplicates ? -1 : 0,out leaf, out pos );
+                var found = Node.Find( Tree._root, value, Tree.KeyComparer, AllowDuplicates ? -1 : 0,out leaf, out pos );
                 int result = Node.GetRootIndex( leaf, pos );
                 if( found )
                     ++result;
@@ -1244,7 +1244,7 @@ namespace TrentTobler.Collections
             {
                 Node leaf;
                 int pos;
-                var found = Node.Find( tree.root, value, tree.KeyComparer, AllowDuplicates ? 1 : 0, out leaf, out pos );
+                var found = Node.Find( Tree._root, value, Tree.KeyComparer, AllowDuplicates ? 1 : 0, out leaf, out pos );
                 int result = Node.GetRootIndex( leaf, pos );
                 if( found )
                     --result;
@@ -1253,37 +1253,37 @@ namespace TrentTobler.Collections
 
             public TKey At( int index )
             {
-                return this.tree.At( index ).Key;
+                return this.Tree.At( index ).Key;
             }
 
             public override bool Contains( TKey item )
             {
-                return tree.ContainsKey( item );
+                return Tree.ContainsKey( item );
             }
 
             public override IEnumerator<TKey> GetEnumerator()
             {
-                return tree.Select( keyValue => keyValue.Key ).GetEnumerator();
+                return Tree.Select( keyValue => keyValue.Key ).GetEnumerator();
             }
 
             public IEnumerable<TKey> WhereGreaterOrEqual( TKey lowerBound )
             {
-                return tree.WhereGreaterOrEqual( lowerBound ).Select( keyValue => keyValue.Key );
+                return Tree.WhereGreaterOrEqual( lowerBound ).Select( keyValue => keyValue.Key );
             }
 
             public IEnumerable<TKey> WhereLessOrEqualBackwards( TKey upperBound )
             {
-                return tree.WhereLessOrEqualBackwards( upperBound ).Select( keyValue => keyValue.Key );
+                return Tree.WhereLessOrEqualBackwards( upperBound ).Select( keyValue => keyValue.Key );
             }
 
             public IEnumerable<TKey> ForwardFromIndex( int index )
             {
-                return this.tree.ForwardFromIndex( index ).Select( item => item.Key );
+                return this.Tree.ForwardFromIndex( index ).Select( item => item.Key );
             }
 
             public IEnumerable<TKey> BackwardFromIndex( int index )
             {
-                return this.tree.BackwardFromIndex( index ).Select( item => item.Key );
+                return this.Tree.BackwardFromIndex( index ).Select( item => item.Key );
             }
 
             #endregion
