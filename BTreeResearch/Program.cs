@@ -1,24 +1,22 @@
-﻿//Copyright 2011 Trent Tobler. All rights reserved.
-
-//Redistribution and use in source and binary forms, with or without modification, are
-//permitted provided that the following conditions are met:
-
-//   1. Redistributions of source code must retain the above copyright notice, this list of
-//      conditions and the following disclaimer.
-
-//   2. Redistributions in binary form must reproduce the above copyright notice, this list
-//      of conditions and the following disclaimer in the documentation and/or other materials
-//      provided with the distribution.
-
-//THIS SOFTWARE IS PROVIDED BY TRENT TOBLER ''AS IS'' AND ANY EXPRESS OR IMPLIED
-//WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-//FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL TRENT TOBLER OR
-//CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-//CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-//SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-//ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-//NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-//ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+﻿// Copyright 2011-2020 Trent Tobler.All rights reserved.
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 using System;
 using System.Collections.Generic;
@@ -28,25 +26,25 @@ using TrentTobler.Collections;
 
 namespace BSkipTreeResearch
 {
-    class Program
-    {
-        struct OptionCommand
-        {
-            public string Text
-            {
-                get;
-                set;
-            }
+	class Program
+	{
+		struct OptionCommand
+		{
+			public string Text
+			{
+				get;
+				set;
+			}
 
-            public Action Action
-            {
-                get;
-                set;
-            }
-        }
+			public Action Action
+			{
+				get;
+				set;
+			}
+		}
 
-        static void Main( string[] args )
-        {
+		static void Main( string[] args )
+		{
 			var seed = 101;
 			var sampleCount = 10000;
 			var nodeCapacity = 128;
@@ -64,11 +62,11 @@ namespace BSkipTreeResearch
 				};
 			}
 
-            var sourceListOrder = 'R';
+			var sourceListOrder = 'R';
 
-            while( true )
-            {
-                Console.Write( $@"
+			while( true )
+			{
+				Console.Write( $@"
 A) List
 B) Dictionary
 C) SortedDictionary
@@ -81,26 +79,26 @@ P) use reverse order source
 
 S=n) set seed to n (current: {seed})
 L=n) set length of sample data to n (current: {sampleCount})
-=n) use n as the btree node capacity (current: {nodeCapacity})
+N=n) use n as the btree node capacity (current: {nodeCapacity})
 
 Enter one or more options: " );
 
-                var optionText = Console.ReadLine();
-                if( string.IsNullOrEmpty( optionText ) )
-                    break;
+				var optionText = Console.ReadLine();
+				if( string.IsNullOrEmpty( optionText ) )
+					break;
 
-				var options = Regex.Matches( optionText, "(?<cmd>[a-zA-Z])?(=(?<arg>[0-9]+))?" ).OfType<Match>().ToArray();
-                Console.WriteLine( "Executing..." );
+				var options = Regex.Matches( optionText, "(?<cmd>[a-zA-Z])(=(?<arg>[0-9]+))?" ).OfType<Match>().ToArray();
+				Console.WriteLine( "Executing..." );
 
 				bool ParseArg( Match option, out int n ) => int.TryParse( option.Groups["arg"].Value, out n );
 
 				foreach( var option in options )
-                {
+				{
 					var cmd = option.Groups["cmd"].Value;
 
 					switch( cmd )
 					{
-						case "":
+						case "N":
 							if( ParseArg( option, out var newNodeCapacity ) )
 							{
 								nodeCapacity = newNodeCapacity;
@@ -130,83 +128,105 @@ Enter one or more options: " );
 						case "O":
 						case "P":
 							sourceListOrder = cmd[0];
-                            break;
+							break;
 
-                        case "A":
-                            CollectionFull_Test( new List<KeyValuePair<int, int>>(), GetSourceList( sourceListOrder ) );
-                            break;
+						case "A":
+							TestCollection( new List<KeyValuePair<int, int>>(), GetSourceList( sourceListOrder ) );
+							break;
 
-                        case "B":
-                            CollectionFull_Test( new Dictionary<int, int>(), GetSourceList( sourceListOrder ) );
-                            break;
+						case "B":
+							TestCollection( new Dictionary<int, int>(), GetSourceList( sourceListOrder ) );
+							break;
 
-                        case "C":
-                            CollectionFull_Test( new SortedDictionary<int, int>(), GetSourceList( sourceListOrder ) );
-                            break;
+						case "C":
+							TestCollection( new SortedDictionary<int, int>(), GetSourceList( sourceListOrder ) );
+							break;
 
-                        case "D":
-                            CollectionFull_Test( new BTreeDictionary<int, int>( nodeCapacity ), GetSourceList( sourceListOrder ) );
-                            break;
+						case "D":
+							TestCollection( new BTreeDictionary<int, int>( nodeCapacity ), GetSourceList( sourceListOrder ) );
+							break;
 
-                        case "F":
-                            CollectionFull_Test( new BTree<int>( nodeCapacity ), GetSourceList( sourceListOrder ).Select( item => item.Key ) );
-                            break;
-                    }
-                }
-            }
-        }
+						case "F":
+							TestCollection( new BTree<int>( nodeCapacity ), GetSourceList( sourceListOrder ).Select( item => item.Key ) );
+							break;
+					}
+				}
+			}
+		}
 
-        static void CollectionFull_Test<T>( ICollection<T> collection, IEnumerable<T> items )
-        {
-            var time = TimeAction( () =>
-            {
-                foreach( var item in items )
-                    collection.Add( item );
-                foreach( var item in items )
-                    collection.Remove( item );
-            } );
+		static void TestCollection<T>( ICollection<T> collection, IEnumerable<T> items )
+		{
+			CollectionAdd_Test( collection, items );
+			CollectionContains_Test( collection, items );
+
+			collection.Clear();
+			CollectionFull_Test( collection, items );
+		}
+
+		static void CollectionFull_Test<T>( ICollection<T> collection, IEnumerable<T> items )
+		{
+			var time = TimeAction( () =>
+			{
+				foreach( var item in items )
+					collection.Add( item );
+				foreach( var item in items )
+					collection.Remove( item );
+			} );
 
 			var ms = time.TotalMilliseconds.ToString( "0.000" ).PadLeft( 8 );
-			Console.WriteLine( $"{ms} = {collection.GetType().Name} [{items.Count()}]" );
-        }
+			Console.WriteLine( $"{ms} = {collection.GetType().Name} [add + remove]" );
+		}
 
-        static void CollectionAdd_Test<T>( ICollection<T> collection, IEnumerable<T> items )
-        {
-            var time = TimeAction( () =>
-            {
-                foreach( var item in items )
-                    collection.Add( item );
-            } );
+		static void CollectionAdd_Test<T>( ICollection<T> collection, IEnumerable<T> items )
+		{
+			var time = TimeAction( () =>
+			{
+				foreach( var item in items )
+					collection.Add( item );
+			} );
 
-            Console.WriteLine(
-                "{0} = {1}",
-                time.TotalMilliseconds.ToString( "0.000" ).PadLeft( 8 ),
-                collection.GetType().Name );
-        }
+			var addMs = time.TotalMilliseconds.ToString( "0.000" ).PadLeft( 8 );
+			Console.WriteLine( $"{addMs} = {collection.GetType().Name} [add]" );
+		}
 
-        static List<int> CreateRandList( int seed, int count )
-        {
+		static void CollectionContains_Test<T>( ICollection<T> collection, IEnumerable<T> items )
+		{
+			var found = 0;
+
+			var time = TimeAction( () =>
+			{
+				foreach( var item in items )
+					if( collection.Contains( item ) )
+						++found;
+			} );
+
+			var addMs = time.TotalMilliseconds.ToString( "0.000" ).PadLeft( 8 );
+			Console.WriteLine( $"{addMs} = {collection.GetType().Name} [contains = {found}]" );
+		}
+
+		static List<int> CreateRandList( int seed, int count )
+		{
 			Random rand = new Random( seed );
 
 			var list = new List<int>();
-            for( int i = 0; i < count; ++i )
-            {
-                list.Add( i );
-                int r = rand.Next( list.Count );
-                int n = list[r];
-                list[r] = list[list.Count - 1];
-                list[list.Count - 1] = n;
-            }
-            return list;
-        }
+			for( int i = 0; i < count; ++i )
+			{
+				list.Add( i );
+				int r = rand.Next( list.Count );
+				int n = list[r];
+				list[r] = list[list.Count - 1];
+				list[list.Count - 1] = n;
+			}
+			return list;
+		}
 
-        static TimeSpan TimeAction( Action a )
-        {
+		static TimeSpan TimeAction( Action a )
+		{
 			var stopwatch = new System.Diagnostics.Stopwatch();
 			stopwatch.Start();
-            a();
+			a();
 			stopwatch.Stop();
-            return stopwatch.Elapsed;
-        }
-    }
+			return stopwatch.Elapsed;
+		}
+	}
 }

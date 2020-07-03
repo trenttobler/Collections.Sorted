@@ -2,6 +2,21 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.1.0</Version>
+    <Authors>Trent Tobler</Authors>
+    <Copyright>Copyright (c) 2011-2020, Trent Tobler</Copyright>
+    <Description>In memory counted B+Tree collection and dictionary.  See https://www.codeproject.com/Articles/274486/A-Better-Sorted-List-and-Dictionary</Description>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/trenttobler/Collections.Sorted</PackageProjectUrl>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="LICENSE.txt" />
+    <None Include="LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>

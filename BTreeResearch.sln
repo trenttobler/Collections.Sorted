@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BTreeResearch", "BTreeResearch\BTreeResearch.csproj", "{61DB32E3-A46D-4452-B29A-E60902DCCD21}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrentTobler.Collections.Sorted", "TrentTobler.Collections.Sorted\TrentTobler.Collections.Sorted.csproj", "{9349DED0-DD66-4117-A534-9A0B04C70692}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrentTobler.Collections.Sorted.Tests", "TrentTobler.Collections.Sorted.Tests\TrentTobler.Collections.Sorted.Tests.csproj", "{33945D5D-1019-41EE-B60D-7C0C8805F622}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrentTobler.Collections.Sorted.Tests", "TrentTobler.Collections.Sorted.Tests\TrentTobler.Collections.Sorted.Tests.csproj", "{33945D5D-1019-41EE-B60D-7C0C8805F622}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BTreeResearch", "BTreeResearch\BTreeResearch.csproj", "{956D5C53-97C3-4685-B39F-FBD37B7D9A82}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,16 +19,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{61DB32E3-A46D-4452-B29A-E60902DCCD21}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{61DB32E3-A46D-4452-B29A-E60902DCCD21}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{61DB32E3-A46D-4452-B29A-E60902DCCD21}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{61DB32E3-A46D-4452-B29A-E60902DCCD21}.Debug|x86.ActiveCfg = Debug|x86
-		{61DB32E3-A46D-4452-B29A-E60902DCCD21}.Debug|x86.Build.0 = Debug|x86
-		{61DB32E3-A46D-4452-B29A-E60902DCCD21}.Release|Any CPU.ActiveCfg = Release|x86
-		{61DB32E3-A46D-4452-B29A-E60902DCCD21}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{61DB32E3-A46D-4452-B29A-E60902DCCD21}.Release|Mixed Platforms.Build.0 = Release|x86
-		{61DB32E3-A46D-4452-B29A-E60902DCCD21}.Release|x86.ActiveCfg = Release|x86
-		{61DB32E3-A46D-4452-B29A-E60902DCCD21}.Release|x86.Build.0 = Release|x86
 		{9349DED0-DD66-4117-A534-9A0B04C70692}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9349DED0-DD66-4117-A534-9A0B04C70692}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9349DED0-DD66-4117-A534-9A0B04C70692}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -53,6 +43,18 @@ Global
 		{33945D5D-1019-41EE-B60D-7C0C8805F622}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{33945D5D-1019-41EE-B60D-7C0C8805F622}.Release|x86.ActiveCfg = Release|Any CPU
 		{33945D5D-1019-41EE-B60D-7C0C8805F622}.Release|x86.Build.0 = Release|Any CPU
+		{956D5C53-97C3-4685-B39F-FBD37B7D9A82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{956D5C53-97C3-4685-B39F-FBD37B7D9A82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{956D5C53-97C3-4685-B39F-FBD37B7D9A82}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{956D5C53-97C3-4685-B39F-FBD37B7D9A82}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{956D5C53-97C3-4685-B39F-FBD37B7D9A82}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{956D5C53-97C3-4685-B39F-FBD37B7D9A82}.Debug|x86.Build.0 = Debug|Any CPU
+		{956D5C53-97C3-4685-B39F-FBD37B7D9A82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{956D5C53-97C3-4685-B39F-FBD37B7D9A82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{956D5C53-97C3-4685-B39F-FBD37B7D9A82}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{956D5C53-97C3-4685-B39F-FBD37B7D9A82}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{956D5C53-97C3-4685-B39F-FBD37B7D9A82}.Release|x86.ActiveCfg = Release|Any CPU
+		{956D5C53-97C3-4685-B39F-FBD37B7D9A82}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
