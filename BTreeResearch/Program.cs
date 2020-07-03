@@ -45,37 +45,43 @@ namespace BSkipTreeResearch
             }
         }
 
-        static int nodeCapacity = 128;
-
         static void Main( string[] args )
         {
-            var rlist = Enumerable.Range( 0, RandList.Count )
-                .Select( i =>
-                    new KeyValuePair<int, int>( RandList[i], i ) );
-            var olist = Enumerable.Range( 0, RandList.Count )
-                .Select( i =>
-                    new KeyValuePair<int, int>( i, i ) );
-            var revlist = Enumerable.Range( 0, RandList.Count )
-                .Select( i =>
-                    new KeyValuePair<int, int>( RandList.Count - i - 1, i ) );
+			var seed = 101;
+			var sampleCount = 10000;
+			var nodeCapacity = 128;
 
-            var sourceList = rlist;
+			var randList = CreateRandList( seed, sampleCount );
+
+			IEnumerable<KeyValuePair<int, int>> GetSourceList( char order )
+			{
+				switch( char.ToUpper( order ) )
+				{
+					case 'R': return randList.Select( ( v, i ) => new KeyValuePair<int, int>( v, i ) );
+					case 'O': return randList.Select( ( v, i ) => new KeyValuePair<int, int>( i, i ) );
+					case 'P': return randList.Select( ( v, i ) => new KeyValuePair<int, int>( randList.Count - i - 1, i ) );
+					default: throw new NotImplementedException( $"Order {order}" );
+				};
+			}
+
+            var sourceListOrder = 'R';
 
             while( true )
             {
-                Console.Write( @"
+                Console.Write( $@"
 A) List
 B) Dictionary
 C) SortedDictionary
 D) BTreeDictionary
 F) BTree
 
-N) Run NUnit tests using reflection.
-
 R) use random source
 O) use ordered source
 P) use reverse order source
-=n) use n as the btree node capacity.
+
+S=n) set seed to n (current: {seed})
+L=n) set length of sample data to n (current: {sampleCount})
+=n) use n as the btree node capacity (current: {nodeCapacity})
 
 Enter one or more options: " );
 
@@ -83,73 +89,70 @@ Enter one or more options: " );
                 if( string.IsNullOrEmpty( optionText ) )
                     break;
 
-                var options = Regex.Matches( optionText, "[a-zA-Z]|(=[0-9]+)" ).OfType<Match>().Select( m => m.Value ).ToArray();
-
+				var options = Regex.Matches( optionText, "(?<cmd>[a-zA-Z])?(=(?<arg>[0-9]+))?" ).OfType<Match>().ToArray();
                 Console.WriteLine( "Executing..." );
 
-                foreach( var option in options )
+				bool ParseArg( Match option, out int n ) => int.TryParse( option.Groups["arg"].Value, out n );
+
+				foreach( var option in options )
                 {
-                    if( option.StartsWith( "=" ) )
-                    {
-                        int n;
-                        if( int.TryParse( option.Substring( 1 ), out n ) )
-                        {
-                            nodeCapacity = n;
-                            Console.WriteLine( "nodeCapacity:{0}", n );
-                        }
-                        continue;
-                    }
+					var cmd = option.Groups["cmd"].Value;
 
-                    switch( option )
-                    {
-                        case "N":
-                            ExecuteNUnitTests();
-                            break;
+					switch( cmd )
+					{
+						case "":
+							if( ParseArg( option, out var newNodeCapacity ) )
+							{
+								nodeCapacity = newNodeCapacity;
+								Console.WriteLine( "nodeCapacity:{0}", nodeCapacity );
+							}
+							break;
 
-                        case "R":
-                            sourceList = rlist;
-                            break;
-                        case "O":
-                            sourceList = olist;
-                            break;
-                        case "P":
-                            sourceList = revlist;
+						case "S":
+							if( ParseArg( option, out var newSeed ) )
+							{
+								seed = newSeed;
+								randList = CreateRandList( seed, sampleCount );
+								Console.WriteLine( "seed:{0}", seed );
+							}
+							break;
+
+						case "L":
+							if( ParseArg( option, out var newSampleCount ) )
+							{
+								sampleCount = newSampleCount;
+								randList = CreateRandList( seed, sampleCount );
+								Console.WriteLine( "sample count:{0}", sampleCount );
+							}
+							break;
+
+						case "R":
+						case "O":
+						case "P":
+							sourceListOrder = cmd[0];
                             break;
 
                         case "A":
-                            CollectionFull_Test( new List<KeyValuePair<int, int>>(), sourceList );
+                            CollectionFull_Test( new List<KeyValuePair<int, int>>(), GetSourceList( sourceListOrder ) );
                             break;
+
                         case "B":
-                            CollectionFull_Test( new Dictionary<int, int>(), sourceList );
+                            CollectionFull_Test( new Dictionary<int, int>(), GetSourceList( sourceListOrder ) );
                             break;
+
                         case "C":
-                            CollectionFull_Test( new SortedDictionary<int, int>(), sourceList );
+                            CollectionFull_Test( new SortedDictionary<int, int>(), GetSourceList( sourceListOrder ) );
                             break;
+
                         case "D":
-                            CollectionFull_Test( new BTreeDictionary<int, int>( nodeCapacity ), sourceList );
+                            CollectionFull_Test( new BTreeDictionary<int, int>( nodeCapacity ), GetSourceList( sourceListOrder ) );
                             break;
+
                         case "F":
-                            CollectionFull_Test( new BTree<int>( nodeCapacity ), sourceList.Select( item => item.Key ) );
+                            CollectionFull_Test( new BTree<int>( nodeCapacity ), GetSourceList( sourceListOrder ).Select( item => item.Key ) );
                             break;
                     }
                 }
-            }
-        }
-
-        private static void ExecuteNUnitTests()
-        {
-            var tests =
-                from t in typeof( TrentTobler.Collections.Sorted.Tests.BTreeTests ).Assembly.GetTypes()
-                from m in t.GetMethods()
-                where m.ReturnType.Name == "Void"
-                where m.GetCustomAttributes( false ).Any( a => a.GetType().Name == "TestAttribute" )
-                let p = m.GetParameters()
-                where p == null || p.Length == 0
-                select m;
-            foreach( var testMethod in tests )
-            {
-                var testInstance = Activator.CreateInstance( testMethod.DeclaringType );
-                testMethod.Invoke( testInstance, null );
             }
         }
 
@@ -163,10 +166,8 @@ Enter one or more options: " );
                     collection.Remove( item );
             } );
 
-            Console.WriteLine(
-                "{0} = {1}",
-                time.TotalMilliseconds.ToString( "0.000" ).PadLeft( 8 ),
-                collection.GetType().Name );
+			var ms = time.TotalMilliseconds.ToString( "0.000" ).PadLeft( 8 );
+			Console.WriteLine( $"{ms} = {collection.GetType().Name} [{items.Count()}]" );
         }
 
         static void CollectionAdd_Test<T>( ICollection<T> collection, IEnumerable<T> items )
@@ -183,9 +184,11 @@ Enter one or more options: " );
                 collection.GetType().Name );
         }
 
-        static List<int> CreateRandList( int count )
+        static List<int> CreateRandList( int seed, int count )
         {
-            var list = new List<int>();
+			Random rand = new Random( seed );
+
+			var list = new List<int>();
             for( int i = 0; i < count; ++i )
             {
                 list.Add( i );
@@ -197,27 +200,13 @@ Enter one or more options: " );
             return list;
         }
 
-        const int testCount = 1000000;
-        static Random rand = new Random( 101 );
-        static List<int> randList = null;
-        static List<int> RandList
-        {
-            get
-            {
-                if( randList == null )
-                {
-                    randList = CreateRandList( testCount );
-                }
-                return randList;
-            }
-        }
-
         static TimeSpan TimeAction( Action a )
         {
-            DateTime start = DateTime.Now.ToUniversalTime();
+			var stopwatch = new System.Diagnostics.Stopwatch();
+			stopwatch.Start();
             a();
-            DateTime done = DateTime.Now.ToUniversalTime();
-            return done - start;
+			stopwatch.Stop();
+            return stopwatch.Elapsed;
         }
     }
 }
